@@ -1,6 +1,5 @@
 package me.obsilabor.tpshud.config
 
-import kotlinx.serialization.encodeToString
 import me.obsilabor.tpshud.json
 import java.io.File
 
@@ -10,7 +9,7 @@ object ConfigManager {
         configFile.writeText(json.encodeToString(config))
     }
 
-    private val configFile = File(System.getProperty("user.dir") + "/config", "tpshud_v2.json")
+    private val configFile = File(System.getProperty("user.dir") + "/config", "tpshud_v3.json")
     var config: TpsHudConfig? = null
     val configOrException: TpsHudConfig
         get() = config ?: throw RuntimeException("Config is null")

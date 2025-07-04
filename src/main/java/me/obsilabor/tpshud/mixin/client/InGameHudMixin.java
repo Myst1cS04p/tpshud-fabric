@@ -2,6 +2,7 @@ package me.obsilabor.tpshud.mixin.client;
 
 import me.obsilabor.tpshud.hud.TpsWidget;
 import me.obsilabor.tpshud.screen.PositionSelectionScreen;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -17,9 +18,9 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderMiscOverlays", at = @At("HEAD"))
     private void renderTpsHud(DrawContext drawContext, RenderTickCounter renderTickCounter, CallbackInfo ci) {
         if(!(MinecraftClient.getInstance().currentScreen instanceof PositionSelectionScreen)) {
-            drawContext.getMatrices().push();
+            var matrices = drawContext.getMatrices().pushMatrix();
             TpsWidget.INSTANCE.render(drawContext);
-            drawContext.getMatrices().pop();
+            matrices.popMatrix();
         }
     }
 }

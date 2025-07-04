@@ -2,7 +2,6 @@
 
 package me.obsilabor.tpshud.hud
 
-import com.mojang.blaze3d.opengl.GlStateManager
 import me.obsilabor.tpshud.TpsTracker
 import me.obsilabor.tpshud.config.ConfigManager
 import me.obsilabor.tpshud.minecraft
@@ -16,41 +15,21 @@ object TpsWidget {
     fun render(context: DrawContext) {
         val config = ConfigManager.config ?: return
         if(!config.isEnabled) return
-        context.matrices.push()
-        context.matrices.scale(ConfigManager.config?.scale?:1f, ConfigManager.config?.scale?:1f, 0f)
+        val matrices = context.matrices
+        matrices.scale(ConfigManager.config?.scale?:1f, ConfigManager.config?.scale?:1f, matrices)
         if(config.backgroundEnabled) {
-            GlStateManager._disableDepthTest()
-            fillBackground(context, config.x.toFloat(), config.y.toFloat(), config.x+width.toFloat(), config.y+minecraft.textRenderer.fontHeight+1f, config.backgroundColor, config.backgroundOpacity)
-            GlStateManager._enableDepthTest()
+            fillBackground(context, config.x.toFloat(), config.y.toFloat(), config.x+width.toFloat(), config.y+minecraft.textRenderer.fontHeight.toFloat()/*+1f*/, config.backgroundColor, config.backgroundOpacity)
         }
         val text = ConfigManager.config?.text ?: "TPS: "
         val widthPartOne = minecraft.textRenderer.getWidth(text)
         context.drawText(minecraft.textRenderer, text, config.x, config.y, config.textColor, config.textShadow)
         context.drawText(minecraft.textRenderer, round(TpsTracker.INSTANCE.tickRate), config.x+widthPartOne, config.y, config.valueTextColor, config.textShadow)
-        context.matrices.pop()
-    }
-
-    fun renderLivePreview(context: DrawContext, x: Int, y: Int) {
-        val config = ConfigManager.config ?: return
-        if(!config.isEnabled) return
-        context.matrices.push()
-        context.matrices.scale(ConfigManager.config?.scale?:1f, ConfigManager.config?.scale?:1f, 0f)
-        if(config.backgroundEnabled) {
-            GlStateManager._disableDepthTest()
-            fillBackground(context, x.toFloat(), y.toFloat(), x+width.toFloat()+7f, y+ minecraft.textRenderer.fontHeight+1f, config.backgroundColor, config.backgroundOpacity)
-            GlStateManager._enableDepthTest()
-        }
-        val text = ConfigManager.config?.text ?: "TPS: "
-        val widthPartOne = minecraft.textRenderer.getWidth(text)
-        context.drawText(minecraft.textRenderer, text, x, y, config.textColor, config.textShadow)
-        context.drawText(minecraft.textRenderer, round(19.89f), x+widthPartOne, y, config.valueTextColor, config.textShadow)
-        context.matrices.pop()
     }
 
     private fun round(tps: Float): String {
         var copy = tps
         copy = if(ConfigManager.config?.satisfyTpsCount == true) {
-            Math.round(copy).toFloat()
+            copy.roundToInt().toFloat()
         } else {
             BigDecimal(copy.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat() // Limit characters
         }

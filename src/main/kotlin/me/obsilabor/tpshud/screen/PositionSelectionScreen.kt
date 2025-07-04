@@ -19,10 +19,10 @@ class PositionSelectionScreen(private val parent: Screen? = null) : Screen(Text.
         val y = ConfigManager.config?.y ?: 0
 
         TpsWidget.render(context)
-        context.matrices.push()
-        context.matrices.scale(ConfigManager.config?.scale ?: 1.0F, ConfigManager.config?.scale ?: 1.0F, 0.0F)
+        val matrices = context.matrices.pushMatrix()
+        context.matrices.scale(ConfigManager.config?.scale ?: 1.0F, ConfigManager.config?.scale ?: 1.0F, matrices)
         drawRect(context, x - 1, y - 1, x + TpsWidget.width, y + textRenderer.fontHeight, -1)
-        context.matrices.pop()
+        context.matrices.popMatrix()
     }
 
     override fun mouseMoved(mouseX: Double, mouseY: Double) {

@@ -74,6 +74,7 @@ object YACLConfigPlatform {
                                 )
                                 ColorControllerBuilder.create(option).allowAlpha(false)
                             }.build(),
+
                         Option.createBuilder<Color>()
                             .name(Text.translatable("option.tpshud.valueTextColor"))
                             .binding(
@@ -83,6 +84,17 @@ object YACLConfigPlatform {
                             )
                             .controller { option ->
                                 ColorControllerBuilder.create(option).allowAlpha(false)
+                            }.build(),
+                        Option.createBuilder<Boolean>()
+                            .name(Text.translatable("option.tpshud.textShadow"))
+                            .description(OptionDescription.of(Text.translatable("option.tpshud.textShadow.tooltip")))
+                            .binding(
+                                true,
+                                { ConfigManager.configOrException.textShadow },
+                                { ConfigManager.configOrException.textShadow = it }
+                            )
+                            .controller { option ->
+                                BooleanControllerBuilder.create(option).yesNoFormatter().coloured(true)
                             }.build(),
                         Option.createBuilder<Boolean>()
                             .name(Text.translatable("option.tpshud.satisfyTpsCount"))
