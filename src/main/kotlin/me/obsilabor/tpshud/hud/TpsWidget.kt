@@ -43,16 +43,19 @@ object TpsWidget {
         if (!config.customText.isEmpty()) {
             text = config.customText
         }
-        var valueStr = BigDecimal(value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat().toString() // Limit characters
+
+        // Limit value, either to an integer or to 2 decimal places
+        val valueStr = if (config.satisfyTpsCount) {
+            value.roundToInt().toString()
+        } else {
+            BigDecimal(value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat().toString()
+        }
+
         return Pair(text, valueStr)
     }
 
     private fun convertToTps(mspt: Float): Float {
-        var tps = kotlin.math.min(1000f / mspt, 20f); // convert mspt to tps
-        if(ConfigManager.config?.satisfyTpsCount == true) {
-            return tps.roundToInt().toFloat()
-        }
-        return tps
+        return kotlin.math.min(1000f / mspt, 20f);
     }
 
     val width: Int
