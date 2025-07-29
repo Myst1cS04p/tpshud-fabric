@@ -39,5 +39,9 @@
   "option.tpshud.showCompatibilityToast": "Show Compatibility Toast",
   "option.tpshud.showCompatibilityToast.tooltip": "If this is enabled, a notification will be displayed if the server you're playing on supports tpshud.",
   "option.tpshud.customText": "Text",
-  "option.tpshud.customText.tooltip": "The text that will be displayed before the actual TPS"
+  "option.tpshud.customText.tooltip": "The text that will be displayed before the actual TPS",
+  "option.tpshud.displayMode": "Display Mode",
+  "option.tpshud.displayMode.tooltip": "Choose whether the HUD displays TPS (Ticks per second) or MSPT (Milliseconds per tick).",
+  "option.tpshud.displayMode.mspt": "MSPT",
+  "option.tpshud.displayMode.tps": "TPS"
 }
