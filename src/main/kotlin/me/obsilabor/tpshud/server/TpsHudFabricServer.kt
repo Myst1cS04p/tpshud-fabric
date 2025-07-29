@@ -16,10 +16,8 @@ class TpsHudFabricServer : DedicatedServerModInitializer {
             Timer().scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     for (player in it.playerManager.playerList) {
-                        val tps = (1000 / it.tickTime).coerceAtMost(20f)
-
                         val byteBuf = PacketByteBufs.create()
-                        byteBuf.writeDouble(tps.toDouble())
+                        byteBuf.writeDouble(it.tickTime.toDouble())
                         ServerPlayNetworking.send(player, Packets.TPS, byteBuf)
                     }
                     (it as IMinecraftServer).setTPS(0.0)
