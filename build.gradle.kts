@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "me.obsilabor"
-version = "1.6.6+1.20.1"
+version = "1.9.0+1.20.1"
 
 repositories {
     mavenCentral()
