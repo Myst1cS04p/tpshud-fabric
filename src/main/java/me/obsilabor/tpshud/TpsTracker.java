@@ -12,7 +12,7 @@ public class TpsTracker {
 
     public static TpsTracker INSTANCE = new TpsTracker();
 
-    private final float[] tickRates = new float[20];
+    private final float[] tickTimesMilli = new float[20];
     private int nextIndex = 0;
     private long timeLastTimeUpdate = -1;
     private long timeGameJoined;
@@ -23,9 +23,11 @@ public class TpsTracker {
     public void onPacketReceive(PacketReceiveEvent event) {
         if (event.getPacket() instanceof WorldTimeUpdateS2CPacket) {
             long now = System.currentTimeMillis();
-            float timeElapsed = (float) (now - timeLastTimeUpdate);
-            tickRates[nextIndex] = timeElapsed;
-            nextIndex = (nextIndex + 1) % tickRates.length;
+            long timeElapsed = now - timeLastTimeUpdate;
+
+            // Packet is sent 1 time per second, so divide per 20 to get MSPT
+            tickTimesMilli[nextIndex] = timeElapsed/20;
+            nextIndex = (nextIndex + 1) % tickTimesMilli.length;
             timeLastTimeUpdate = now;
         }
     }
@@ -33,7 +35,7 @@ public class TpsTracker {
     @Subscribe
     public void onGameJoined(GameJoinEvent event) {
         serverProvidedTps = -1;
-        Arrays.fill(tickRates, 0);
+        Arrays.fill(tickTimesMilli, 0);
         nextIndex = 0;
         timeGameJoined = timeLastTimeUpdate = System.currentTimeMillis();
     }
@@ -51,13 +53,13 @@ public class TpsTracker {
 
         // Calculate average tick time from network using the last 20 estimated tick times
         int numTicks = 0;
-        float sumTickRates = 0.0f;
-        for (float tickRate : tickRates) {
-            if (tickRate > 0) {
-                sumTickRates += tickRate;
+        float sumTickTimes = 0;
+        for (float tickTime : tickTimesMilli) {
+            if (tickTime > 0) {
+                sumTickTimes += tickTime;
                 numTicks++;
             }
         }
-        return sumTickRates / numTicks;
+        return sumTickTimes / numTicks;
     }
 }
