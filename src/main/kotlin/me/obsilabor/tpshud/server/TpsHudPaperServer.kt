@@ -15,7 +15,11 @@ class TpsHudPaperServer : JavaPlugin(), Listener {
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, Packets.HANDSHAKE)
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, Runnable {
             for (player in Bukkit.getOnlinePlayers()) {
-                player.sendPluginMessage(this, Packets.TPS, ByteBuffer.allocate(8).putDouble(Bukkit.getTPS()[0]).array())
+                // Convert to MSPT
+                val tps = Bukkit.getTPS()[0]
+                val mspt = if (tps > 0) 1000.0 / tps else 50.0
+
+                player.sendPluginMessage(this, Packets.TPS, ByteBuffer.allocate(9).putDouble(mspt).put(1).array())
             }
         }, 0, 20L)
     }

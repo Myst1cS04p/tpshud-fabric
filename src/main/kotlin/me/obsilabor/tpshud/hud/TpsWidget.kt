@@ -20,24 +20,49 @@ object TpsWidget {
         if(config.backgroundEnabled) {
             fillBackground(context, config.x.toFloat(), config.y.toFloat(), config.x+width.toFloat(), config.y+minecraft.textRenderer.fontHeight.toFloat()/*+1f*/, config.backgroundColor, config.backgroundOpacity)
         }
-        val text = ConfigManager.config?.text ?: "TPS: "
+
+        // Get text and value, for MSPT or TPS
+        var (text, value) = getTextAndValue()
+
+        // Render it
         val widthPartOne = minecraft.textRenderer.getWidth(text)
         context.drawText(minecraft.textRenderer, text, config.x, config.y, config.textColor, config.textShadow)
-        context.drawText(minecraft.textRenderer, round(TpsTracker.INSTANCE.tickRate), config.x+widthPartOne, config.y, config.valueTextColor, config.textShadow)
+        context.drawText(minecraft.textRenderer, value, config.x+widthPartOne, config.y, config.valueTextColor, config.textShadow)
     }
 
-    private fun round(tps: Float): String {
-        var copy = tps
-        copy = if(ConfigManager.config?.satisfyTpsCount == true) {
-            copy.roundToInt().toFloat()
+    // Return text and value, ready for rendering
+    private fun getTextAndValue(): Pair<String, String> {
+        val config = ConfigManager.config ?: return Pair("TPS: ", "0.00")
+
+        var (text, value) = if(config.displayModeTps) {
+            Pair("TPS: ", convertToTps(TpsTracker.INSTANCE.tickTime))
         } else {
-            BigDecimal(copy.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat() // Limit characters
+            Pair("MSPT: ", TpsTracker.INSTANCE.tickTime)
         }
-        return copy.toString()
+        // Override text if customText is set
+        if (!config.customText.isEmpty()) {
+            text = config.customText
+        }
+
+        // Limit value, either to an integer or to 2 decimal places
+        val valueStr = if (config.satisfyTpsCount) {
+            value.roundToInt().toString()
+        } else {
+            BigDecimal(value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat().toString()
+        }
+
+        return Pair(text, valueStr)
+    }
+
+    private fun convertToTps(mspt: Float): Float {
+        return kotlin.math.min(1000f / mspt, 20f);
     }
 
     val width: Int
-        get() = minecraft.textRenderer.getWidth(ConfigManager.config?.text ?: "TPS: ")+minecraft.textRenderer.getWidth(round(TpsTracker.INSTANCE.tickRate))
+        get() {
+            val (text, value) = getTextAndValue()
+            return minecraft.textRenderer.getWidth(text) + minecraft.textRenderer.getWidth(value)
+        }
 
     private fun fillBackground(drawContext: DrawContext, x1: Float, y1: Float, x2: Float, y2: Float, color: Int, alpha: Float) {
         val rgb = Color(color)

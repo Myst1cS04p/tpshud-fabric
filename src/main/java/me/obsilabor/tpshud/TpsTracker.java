@@ -12,7 +12,7 @@ public class TpsTracker {
 
     public static TpsTracker INSTANCE = new TpsTracker();
 
-    private final float[] tickRates = new float[20];
+    private final float[] tickTimesMilli = new float[20];
     private int nextIndex = 0;
     private long timeLastTimeUpdate = -1;
     private long timeGameJoined;
@@ -23,9 +23,11 @@ public class TpsTracker {
     public void onPacketReceive(PacketReceiveEvent event) {
         if (event.getPacket() instanceof WorldTimeUpdateS2CPacket) {
             long now = System.currentTimeMillis();
-            float timeElapsed = (float) (now - timeLastTimeUpdate) / 1000.0F;
-            tickRates[nextIndex] = clamp(20.0f / timeElapsed, 0.0f, 20.0f);
-            nextIndex = (nextIndex + 1) % tickRates.length;
+            long timeElapsed = now - timeLastTimeUpdate;
+
+            // Packet is sent 1 time per second, so divide per 20 to get MSPT
+            tickTimesMilli[nextIndex] = timeElapsed/20;
+            nextIndex = (nextIndex + 1) % tickTimesMilli.length;
             timeLastTimeUpdate = now;
         }
     }
@@ -33,32 +35,31 @@ public class TpsTracker {
     @Subscribe
     public void onGameJoined(GameJoinEvent event) {
         serverProvidedTps = -1;
-        Arrays.fill(tickRates, 0);
+        Arrays.fill(tickTimesMilli, 0);
         nextIndex = 0;
         timeGameJoined = timeLastTimeUpdate = System.currentTimeMillis();
     }
 
-    public float getTickRate() {
-        MinecraftClient minecraft = MinecraftClient.getInstance();
+    // Return milliseconds per tick (MSPT)
+    public float getTickTime() {
+        // get server side TPS if enabled and available
         if (serverProvidedTps != -1 && ConfigManager.INSTANCE.getConfig().getUseServerProvidedData()) {
             return serverProvidedTps;
         }
+
+        MinecraftClient minecraft = MinecraftClient.getInstance();
         if (minecraft.player == null) return 0;
         if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
 
+        // Calculate average tick time from network using the last 20 estimated tick times
         int numTicks = 0;
-        float sumTickRates = 0.0f;
-        for (float tickRate : tickRates) {
-            if (tickRate > 0) {
-                sumTickRates += tickRate;
+        float sumTickTimes = 0;
+        for (float tickTime : tickTimesMilli) {
+            if (tickTime > 0) {
+                sumTickTimes += tickTime;
                 numTicks++;
             }
         }
-        return sumTickRates / numTicks;
-    }
-
-    private float clamp(float value, float min, float max) {
-        if (value < min) return min;
-        return Math.min(value, max);
+        return sumTickTimes / numTicks;
     }
 }

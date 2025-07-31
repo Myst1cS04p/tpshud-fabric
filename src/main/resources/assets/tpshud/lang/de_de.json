@@ -39,5 +39,9 @@
   "option.tpshud.showCompatibilityToast": "Kompatibilitäts-Meldung anzeigen",
   "option.tpshud.showCompatibilityToast.tooltip": "Wenn aktiviert, wird eine Benachrichtung gesendet, sofern der Server die Mod unterstütz.",
   "option.tpshud.customText": "Text",
-  "option.tpshud.customText.tooltip": "Der Präfix, der vor den TPS angezeigt wird."
+  "option.tpshud.customText.tooltip": "Der Präfix, der vor den TPS angezeigt wird.",
+  "option.tpshud.displayMode": "Anzeigemodus",
+  "option.tpshud.displayMode.tooltip": "Wähle ob das HUD die TPS (Ticks Pro Sekunde) oder MSPT (Millisekunden per Tick) anzeigt.",
+  "option.tpshud.displayMode.mspt": "MSPT",
+  "option.tpshud.displayMode.tps": "TPS"
 }

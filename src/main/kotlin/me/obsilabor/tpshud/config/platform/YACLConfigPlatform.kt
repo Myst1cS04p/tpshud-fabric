@@ -111,12 +111,28 @@ object YACLConfigPlatform {
                             .name(Text.translatable("option.tpshud.customText"))
                             .description(OptionDescription.of(Text.translatable("option.tpshud.customText.tooltip")))
                             .binding(
-                                "TPS: ",
-                                { ConfigManager.configOrException.text },
-                                { ConfigManager.configOrException.text = it }
+                                "",
+                                { ConfigManager.configOrException.customText },
+                                { ConfigManager.configOrException.customText = it }
                             )
                             .controller { option ->
                                 StringControllerBuilder.create(option)
+                            }.build(),
+                        Option.createBuilder<Boolean>()
+                            .name(Text.translatable("option.tpshud.displayMode"))
+                            .description(OptionDescription.of(Text.translatable("option.tpshud.displayMode.tooltip")))
+                            .binding(
+                                true,
+                                { ConfigManager.configOrException.displayModeTps },
+                                { ConfigManager.configOrException.displayModeTps = it }
+                            )
+                            .controller { opt ->
+                                BooleanControllerBuilder.create(opt)
+                                    .formatValue { value ->
+                                        if (value) Text.translatable("option.tpshud.displayMode.tps")
+                                        else Text.translatable("option.tpshud.displayMode.mspt")
+                                    }
+                                    .coloured(true)
                             }.build()
                     )
                 ).build()
