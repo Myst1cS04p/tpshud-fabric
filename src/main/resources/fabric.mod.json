@@ -32,7 +32,7 @@
   "depends": {
     "fabric-api": "*",
     "fabric-language-kotlin": "*",
-    "minecraft": ">=1.21.5"
+    "minecraft": ">=1.21.7"
   },
   "recommends": {
     "modmenu": "*",
