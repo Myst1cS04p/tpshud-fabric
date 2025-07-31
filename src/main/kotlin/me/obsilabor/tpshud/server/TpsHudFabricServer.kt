@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.server.MinecraftServer
 import java.util.*
 
 class TpsHudFabricServer : DedicatedServerModInitializer {
@@ -16,7 +17,7 @@ class TpsHudFabricServer : DedicatedServerModInitializer {
                 override fun run() {
                     for (player in it.playerManager.playerList) {
                         val byteBuf = PacketByteBufs.create()
-                        byteBuf.writeDouble((it as IMinecraftServer).tps)
+                        byteBuf.writeDouble(it.tickTime.toDouble())
                         ServerPlayNetworking.send(player, Packets.TPS, byteBuf)
                     }
                     (it as IMinecraftServer).setTPS(0.0)

@@ -11,6 +11,8 @@ import net.minecraft.client.render.*
 import net.minecraft.client.util.math.MatrixStack
 import org.joml.Matrix4f
 import java.awt.Color
+import java.math.RoundingMode
+import java.math.BigDecimal
 import kotlin.math.roundToInt
 
 object TpsWidget {
@@ -24,44 +26,49 @@ object TpsWidget {
             fillBackground(context, config.x.toFloat(), config.y.toFloat(), config.x+width.toFloat(), config.y+minecraft.textRenderer.fontHeight+1f, config.backgroundColor, config.backgroundOpacity)
             RenderSystem.enableDepthTest()
         }
-        val text = ConfigManager.config?.text ?: "TPS: "
+
+        // Get text and value, for MSPT or TPS
+        var (text, value) = getTextAndValue()
+
+        // Render it
         val widthPartOne = minecraft.textRenderer.getWidth(text)
         context.drawText(minecraft.textRenderer, text, config.x, config.y, config.textColor, config.textShadow)
-        context.drawText(minecraft.textRenderer, removeDot(TpsTracker.INSTANCE.tickRate), config.x+widthPartOne, config.y, config.valueTextColor, config.textShadow)
-        context.matrices.pop()
+        context.drawText(minecraft.textRenderer, value, config.x+widthPartOne, config.y, config.valueTextColor, config.textShadow)
     }
 
-    fun renderLivePreview(context: DrawContext, x: Int, y: Int) {
-        val config = ConfigManager.config ?: return
-        if(!config.isEnabled) return
-        context.matrices.push()
-        context.matrices.scale(ConfigManager.config?.scale?:1f, ConfigManager.config?.scale?:1f, 0f)
-        if(config.backgroundEnabled) {
-            RenderSystem.disableDepthTest()
-            fillBackground(context, x.toFloat(), y.toFloat(), x+width.toFloat()+7f, y+ minecraft.textRenderer.fontHeight+1f, config.backgroundColor, config.backgroundOpacity)
-            RenderSystem.enableDepthTest()
-        }
-        val text = ConfigManager.config?.text ?: "TPS: "
-        val widthPartOne = minecraft.textRenderer.getWidth(text)
-        context.drawText(minecraft.textRenderer, text, x, y, config.textColor, config.textShadow)
-        context.drawText(minecraft.textRenderer, removeDot(19.89f), x+widthPartOne, y, config.valueTextColor, config.textShadow)
-        context.matrices.pop()
-    }
+    // Return text and value, ready for rendering
+    private fun getTextAndValue(): Pair<String, String> {
+        val config = ConfigManager.config ?: return Pair("TPS: ", "0.00")
 
-    private fun removeDot(tps: Float): String {
-        var copy = tps
-        if(copy >= 19.79 && ConfigManager.config?.satisfyTpsCount == true) { // show 20 to satisfy the user
-            copy = 20.0f
-        }
-        return if(tps.toString().contains(".")) {
-            copy.toString().split(".")[0]
+        var (text, value) = if(config.displayModeTps) {
+            Pair("TPS: ", convertToTps(TpsTracker.INSTANCE.tickTime))
         } else {
-            copy.toString()
+            Pair("MSPT: ", TpsTracker.INSTANCE.tickTime)
         }
+        // Override text if customText is set
+        if (!config.customText.isEmpty()) {
+            text = config.customText
+        }
+
+        // Limit value, either to an integer or to 2 decimal places
+        val valueStr = if (config.satisfyTpsCount) {
+            value.roundToInt().toString()
+        } else {
+            BigDecimal(value.toDouble()).setScale(2, RoundingMode.HALF_UP).toFloat().toString()
+        }
+
+        return Pair(text, valueStr)
+    }
+
+    private fun convertToTps(mspt: Float): Float {
+        return kotlin.math.min(1000f / mspt, 20f);
     }
 
     val width: Int
-        get() = minecraft.textRenderer.getWidth(ConfigManager.config?.text ?: "TPS: ")+minecraft.textRenderer.getWidth(removeDot(TpsTracker.INSTANCE.tickRate))
+        get() {
+            val (text, value) = getTextAndValue()
+            return minecraft.textRenderer.getWidth(text) + minecraft.textRenderer.getWidth(value)
+        }
 
     private fun fillBackground(drawContext: DrawContext, x1: Float, y1: Float, x2: Float, y2: Float, color: Int, alpha: Float) {
         // Doesn't work / only works without alpha / looks ugly - Due to removal of RenderSystem.disableTexture

@@ -38,7 +38,7 @@ dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:1.20.1+build.1")
     modImplementation("net.fabricmc:fabric-loader:0.14.21")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:0.83.0+1.20")
+    modImplementation("net.fabricmc.fabric-api:fabric-api:0.83.0+1.20.1")
     modImplementation("net.fabricmc:fabric-language-kotlin:1.9.4+kotlin.1.8.21")
     // modmenu
     modApi("maven.modrinth:modmenu:7.0.0-beta.2")
